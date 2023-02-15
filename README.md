@@ -17,6 +17,7 @@ parsed before just to save it in a different format.
 - [ ] Login information hardcoded
 - [ ] It's possible to set date_to < date from
 - [ ] Only pandas.to_ formats are available
+- [ ] GUI code is not properly structured 
 - [ ] Minimalistic GUI
 - [ ] Missing option to add accounts via GUI
 - [ ] Missing option to set hours and minutes in dates 
