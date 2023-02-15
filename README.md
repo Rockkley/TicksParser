@@ -8,7 +8,7 @@ Supported formats for saving ticks: pkl, csv, json, html, xml, xlsx
 ***work in progress***
 
 ## Known issues:
-- [ ] Parsing all symbol's ticks for the whole period at once, what leads to failing to parse big amount of ticks (unknown amount).
+- [ ] Parsing all symbol's ticks for the whole period at once, what leads to fail on parsing big amount of ticks (unknown amount).
 - [ ] Fails to create treeview of symbols found on server with multiple sub-dirs.
 - [ ] Logger window is not used.
 - [ ] The parsed ticks aren't stored temporary anywhere, what may lead to re-parsing ticks that have been already 
