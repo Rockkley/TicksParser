@@ -2,7 +2,7 @@
 Ticks and Formats data structures
 """
 from datetime import datetime
-from typing import NamedTuple, Callable
+from typing import NamedTuple, Callable, Optional
 from enum import Enum
 
 import pandas as pd
@@ -49,7 +49,7 @@ class Formats(Enum):
     XLSX = 'xlsx'
 
     @classmethod
-    def save_match_format(cls, ticks_file: Ticks, format_) -> Callable:
+    def save_match_format(cls, ticks_file: Ticks, format_) -> Callable | bool:
         """
         Returns the appropriate file format save method.
         :param ticks_file:
@@ -57,11 +57,12 @@ class Formats(Enum):
         :return: A callable function, which saves the dataframe to the specified format.
 
         """
-        return {
+        formats = {
             Formats.PKL:  ticks_file.DATAFRAME.to_pickle,
             Formats.CSV:  ticks_file.DATAFRAME.to_csv,
             Formats.HTML: ticks_file.DATAFRAME.to_html,
             Formats.JSON: ticks_file.DATAFRAME.to_json,
             Formats.XML:  ticks_file.DATAFRAME.to_xml,
             Formats.XLSX: ticks_file.DATAFRAME.to_excel,
-        }.get(format_)
+        }
+        return False if format_ not in formats else formats.get(format_)

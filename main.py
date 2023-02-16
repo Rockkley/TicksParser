@@ -80,7 +80,7 @@ class TicksGetter:
 
     @login.register
     def _(self, account_info: str):
-        account_info = self.get_account_from_string(account_info)
+        account_info = self.get_account_from_string(account_info=account_info)
         return self.login(None, account_info=account_info)
 
     def set_account_info(self) -> bool:
@@ -100,7 +100,7 @@ class TicksGetter:
         """
 
         :param format_:
-        :return:
+        :return: True if file saved successfully, else False.
         """
         format_name = format_.value
         for ticks_file in self.collected_tickets:
@@ -112,8 +112,8 @@ class TicksGetter:
                 format=format_name,
                 filename=ticks_file.TITLE,
                 broker=ticks_file.BROKER,
-                date_from=ticks_file.DATE_FROM.year,
-                date_to=ticks_file.DATE_TO.year,
+                date_from=f'{ticks_file.DATE_FROM.year}_{ticks_file.DATE_FROM.month}_{ticks_file.DATE_FROM.day}',
+                date_to=f'{ticks_file.DATE_TO.year}_{ticks_file.DATE_TO.month}_{ticks_file.DATE_TO.day}',
                 format_extension=format_name)
             path = Path(out_filename_template).resolve()
 
@@ -129,7 +129,6 @@ class TicksGetter:
 
             if Path.is_file(path):  # Checking file actually saved and presents in the folder
                 logger.info('Successfully saved to %s.%s\n', ticks_file.TITLE, format_name)
-                return True
             else:
                 print(ticks_file, format_, path, format_name)
                 logger.error('ERROR while saving to .%s', format_name)
@@ -141,13 +140,12 @@ class TicksGetter:
         Close the connection to MT account, shutdowns terminal
         """
         if self.authorized:
-            self.symbols_from_server = None
+            self.symbols_from_server.clear()
             self.company_name = None
             logger.info('Closing connection ...')
             mt5.shutdown()
             self.authorized = False
             logger.info('Connection closed')
-            self.symbols_from_server = None
         else:
             logger.warning('Connection was not established')
 
