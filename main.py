@@ -1,11 +1,12 @@
-from pathlib import Path
-from datetime import datetime
-from string import Template
-from datatypes import Ticks, Formats
 import logging
+from functools import singledispatch, singledispatchmethod
+from string import Template
+from datetime import datetime
+from pathlib import Path
 import MetaTrader5 as mt5
 import pandas as pd
 import pytz
+from datatypes import Ticks, Formats
 from accounts import LoginInfo, Accounts
 
 
@@ -50,19 +51,18 @@ class TicksGetter:
             logger.error(attr_error)
             return False
 
-    def login(self, account_info: LoginInfo | str):
+    @singledispatchmethod
+    def login(self, bug: None, account_info: LoginInfo) -> bool:
         """
-
+        :param bug: https://bugs.python.org/issue41122
         :param account_info:
-        :return:
+        :return: bool
         """
         if self.authorized:
             self.close_connection()
-        if isinstance(account_info, str):
-            account_info = self.get_account_from_string(account_info)
         if not account_info:
             logger.error('Invalid account parameters')
-            return
+            return False
 
         logger.info('Launching MetaTrader at %s ...', account_info.TERMINAL_PATH)
         try:
@@ -72,10 +72,16 @@ class TicksGetter:
                 server=account_info.SERVER,
                 path=account_info.TERMINAL_PATH)
         except Exception as excpt:
-            logger.error('Invalid login credentials', excpt)
+            logger.error('Invalid login credentials, %s', excpt)
             return False
         self.set_account_info()
         logger.info('Connected to %s (login: %s)\n', self.company_name, account_info.LOGIN)
+        return True
+
+    @login.register
+    def _(self, account_info: str):
+        account_info = self.get_account_from_string(account_info)
+        return self.login(None, account_info=account_info)
 
     def set_account_info(self) -> bool:
         """
@@ -123,6 +129,7 @@ class TicksGetter:
 
             if Path.is_file(path):  # Checking file actually saved and presents in the folder
                 logger.info('Successfully saved to %s.%s\n', ticks_file.TITLE, format_name)
+                return True
             else:
                 print(ticks_file, format_, path, format_name)
                 logger.error('ERROR while saving to .%s', format_name)
@@ -153,7 +160,7 @@ class TicksGetter:
         if not self.symbols_from_server:
             logger.error("Didn't received symbols from server")
             return False
-        elif {symbol} > self.symbols_from_server:
+        if {symbol} > self.symbols_from_server:
             logger.warning('%s is not in the list of symbols from %s server',
                            symbol, self.company_name)
             return False
@@ -220,5 +227,3 @@ class TicksGetter:
 
     # def get_ticks_partly(self, symbol: tuple | str):  # todo
     #     ...
-
-

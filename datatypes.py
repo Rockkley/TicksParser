@@ -65,8 +65,3 @@ class Formats(Enum):
             Formats.XML:  ticks_file.DATAFRAME.to_xml,
             Formats.XLSX: ticks_file.DATAFRAME.to_excel,
         }.get(format_)
-
-    #
-    # def __getitem__(self, item):
-    #     print(f'returning {item.name} source {item}')
-    #     return item.name

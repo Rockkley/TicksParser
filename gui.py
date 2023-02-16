@@ -126,10 +126,10 @@ class GUI:
         self.logger_frame.grid(row=1, column=1, padx=10, pady=10)
         self.logger_field = tk.Text(self.logger_frame, height=20, width=52, state='disabled')
         self.logger_field.grid(row=1, column=0, padx=10, pady=10)
-        self.tzt = tk.Button(
-            self.logger_side,
-            text='tzt button')
-        self.tzt.grid(row=0, column=1)
+        # self.tzt = tk.Button(
+        #     self.logger_side,
+        #     text='tzt button')
+        # self.tzt.grid(row=0, column=1)
 
         # Scrollbar layouts
         self.scrollbar_layout = tk.Canvas(settings_frame)
@@ -159,8 +159,12 @@ class GUI:
         self.to_get_scrollbar.grid(row=2, column=3, columnspan=3, sticky="ns")
         self.scrollbar_layout.grid(column=1, row=2)
         self.scrollbar_to_get_layout.grid(column=2, row=2)
-        self.server_symbols_tree.bind('<Double-1>', lambda _: self.move_symbols(source='on_server'))
-        self.symbols_to_get_tree.bind('<Double-1>', lambda _: self.move_symbols(source='on_parselist'))
+        self.server_symbols_tree.bind(
+            '<Double-1>', lambda _: self.move_symbols(source='on_server')
+        )
+        self.symbols_to_get_tree.bind(
+            '<Double-1>', lambda _: self.move_symbols(source='on_parselist')
+        )
         self.on_server_scrollbar.configure(command=self.server_symbols_tree.yview)
         # Login button
         self.btn_login = ttk.Button(settings_frame, text="Login", command=self.login_from_btn)
@@ -270,12 +274,12 @@ class GUI:
         if not chosen_symbols:
             logger.warning('No selected symbols')
             return
-        format = Formats[self.format_combobox.get().upper()]
+        format_ = Formats[self.format_combobox.get().upper()]
         if self.set_dates_from_spinboxes():
             valid_symbols = self.ticks_getter.validate_symbols(chosen_symbols)
             self.ticks_getter.get_ticks(valid_symbols)
 
-            self.ticks_getter.save_to_file(format_=format)
+            self.ticks_getter.save_to_file(format_=format_)
 
     def update_date_in_spinbox(self, source: str, month: int, year: int):
         if source == 'from':
@@ -296,8 +300,9 @@ class GUI:
 
 
 if __name__ == '__main__':
+    logger.info("Launching program...")
     gui = GUI()
     gui.root.mainloop()
-    logger.info("Start...")
+
     # ticks_getter.login(Accounts.fbs)
     # ticks_getter.get_ticks(('XAUUSD',))
