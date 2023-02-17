@@ -15,7 +15,7 @@ Supported formats for saving ticks: pkl, csv, json, html, xml, xlsx
 - [ ] The parsed ticks aren't stored temporary anywhere, what may lead to re-parsing ticks that have been already 
 parsed before just to save it in a different format.
 - [ ] Login information hardcoded
-- [ ] It's possible to set date_to < date from
+- [x] It's possible to set date_to < date from
 - [ ] Only pandas.to_ formats are available
 - [ ] GUI code is not properly structured 
 - [ ] Minimalistic GUI
