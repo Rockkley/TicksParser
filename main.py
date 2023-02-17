@@ -1,3 +1,4 @@
+"""Entry point to the program"""
 import logging
 from datetime import datetime
 import gui
@@ -16,5 +17,5 @@ logging.basicConfig(datefmt='%d-%m-%y %H:%M:%S', level=logging.INFO)
 if __name__ == '__main__':
     logger.info("Launching program...")
     gui = gui.GUI()
-    gui.root.mainloop()
+    gui.mainloop()
 

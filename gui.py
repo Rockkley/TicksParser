@@ -6,20 +6,20 @@ from accounts import Accounts
 from ticksgetter import logger, Formats, TicksGetter
 
 
-class GUI:
+class GUI(tk.Tk):
     def __init__(self):
-        self.root = tk.Tk()
-        self.root.title("Ticks Getter")
+        super().__init__()
+        self.title("Ticks Getter")
         self.labels_font = '0 10 bold'
         self.ticks_getter = TicksGetter()
         # Settings side
-        self.settings_side = tk.Frame(self.root)
+        self.settings_side = tk.Frame(self)
         self.settings_side.grid(row=0, column=0, padx=10, pady=10, sticky="N")
         # Settings frame
         settings_frame = tk.LabelFrame(self.settings_side, text="Settings", font=self.labels_font)
         settings_frame.grid(row=0, column=0, padx=10, pady=10)
         # Main title
-        self.main_title = tk.Label(self.root, text='Settings', font='0 12 italic', pady=15, padx=10)
+        self.main_title = tk.Label(self, text='Settings', font='0 12 italic', pady=15, padx=10)
         self.main_title.grid(row=0, column=0, sticky='nw')
         # Login label
         self.login_label = ttk.Label(settings_frame, text="Broker", font=self.labels_font)
@@ -120,16 +120,12 @@ class GUI:
         )
         self.year_to_spinbox.grid(column=1, row=1)
         # Logger Frame
-        self.logger_side = tk.Frame(self.root)
+        self.logger_side = tk.Frame(self)
         self.logger_side.grid(row=0, column=1, padx=10, pady=10, sticky="N")
         self.logger_frame = tk.LabelFrame(self.logger_side, text="Log", font=self.labels_font)
         self.logger_frame.grid(row=1, column=1, padx=10, pady=10)
         self.logger_field = tk.Text(self.logger_frame, height=20, width=52, state='disabled')
         self.logger_field.grid(row=1, column=0, padx=10, pady=10)
-        # self.tzt = tk.Button(
-        #     self.logger_side,
-        #     text='tzt button')
-        # self.tzt.grid(row=0, column=1)
 
         # Scrollbar layouts
         self.scrollbar_layout = tk.Canvas(settings_frame)
@@ -169,7 +165,7 @@ class GUI:
         # Login button
         self.btn_login = ttk.Button(settings_frame, text="Login", command=self.login_from_btn)
         self.btn_login.grid(row=0, column=1, pady=10, sticky='e')
-        self.btn_info = tk.Button(self.root, text="?", borderwidth=1, command=self.show_info)
+        self.btn_info = tk.Button(self, text="?", borderwidth=1, command=self.show_info)
         self.btn_info.grid(row=0, column=1, sticky="SE", pady=15, padx=15)
         # Get ticks button
         self.btn_get_ticks = ttk.Button(
@@ -189,7 +185,6 @@ class GUI:
             self.server_symbols_tree.insert('', 'end', path, text=path)
 
         rest = [i.split('\\') for i in self.ticks_getter.symbols_from_server]
-        print(rest)
 
         # Insert children nodes into the tree
         for path in symbols_paths:
@@ -240,10 +235,6 @@ class GUI:
         self.btn_get_ticks['state'] = 'normal' if len(to_get_list) > 0 else 'disabled'
         # self.update_symbols_counters()
 
-    def update_symbols_counters(self):
-        self.label_symbols_to_get.config(
-            text=f"To get:\n{len(self.symbols_to_get_tree.get_children())}")
-
     def login_from_btn(self):
         self.ticks_getter.login(self.login_combobox.get())
         if self.ticks_getter.authorized and self.ticks_getter.symbols_from_server:
@@ -255,15 +246,16 @@ class GUI:
             # self.update_symbols_counters()
 
     def set_dates_from_spinboxes(self) -> bool:
-        """Parse dates from GUI spinboxes into timestamps for the TicksGetter parameters"""
+        """Parsing dates from GUI spinboxes into timestamps for the TicksGetter parameters."""
         from_date = datetime(*map(int, [self.year_from_spinbox.get(),
                                         self.month_from_spinbox.get(),
                                         self.day_from_spinbox.get()]))
         to_date = datetime(*map(int, [self.year_to_spinbox.get(),
                                       self.month_to_spinbox.get(),
                                       self.day_to_spinbox.get()]))
-        if from_date == to_date:
-            logger.warning('"Date from" and "Date to" must be different')
+
+        if from_date >= to_date:
+            logger.warning('"Date to" must be greater than "Date from"')
             return False
         self.ticks_getter.utc_from = from_date
         self.ticks_getter.utc_to = to_date
@@ -297,5 +289,3 @@ class GUI:
         #     self.day_from_spinbox.config(to=days_in_month[month])
         # elif source == 'to':
         #     self.day_to_spinbox.config(to=days_in_month[month])
-
-

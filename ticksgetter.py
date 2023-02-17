@@ -1,13 +1,13 @@
-from main import logger
 from pathlib import Path
-import MetaTrader5 as mt5
-import pandas as pd
-import pytz
-from datatypes import Ticks, Formats
-from accounts import LoginInfo, Accounts
 from functools import singledispatchmethod
 from string import Template
 from datetime import datetime
+import MetaTrader5 as mt5
+import pandas as pd
+import pytz
+from main import logger
+from datatypes import Ticks, Formats
+from accounts import LoginInfo, Accounts
 
 
 class TicksGetter:
@@ -50,10 +50,9 @@ class TicksGetter:
         if self.authorized:
             self.close_connection()
         if not account_credentials:
-            logger.error('Invalid account parameters')
+            logger.error('Invalid account credentials')
             return False
 
-        logger.info('Launching MetaTrader at %s ...', account_credentials.TERMINAL_PATH)
         try:
             self.authorized = mt5.initialize(
                 login=account_credentials.LOGIN,
@@ -63,7 +62,10 @@ class TicksGetter:
         except Exception as excpt:
             logger.error('Invalid login credentials, %s', excpt)
             return False
-        self.set_account_info()
+        logger.info('Launching MetaTrader at %s ...', account_credentials.TERMINAL_PATH)
+        if not self.set_account_info():
+            logger.error('Failed on setting account information')
+            return False
         logger.info('Connected to %s (login: %s)\n', self.company_name, account_credentials.LOGIN)
         return True
 
@@ -75,14 +77,14 @@ class TicksGetter:
     def set_account_info(self) -> bool:
         """
 
-        :return: True if setting account info was successful, else False
+        :return: True if account info set successfully, else False
         """
         self.company_name = mt5.account_info().company
         self.symbols_from_server = {symbol.path for symbol in mt5.symbols_get()}
         if not self.symbols_from_server:
             logger.error('Did not received symbols list from the server')
             return False
-        logger.info('Got symbols list from the server')
+        logger.info('Got account information the server')
         return True
 
     def save_to_file(self, format_: Formats) -> bool:
@@ -157,7 +159,7 @@ class TicksGetter:
             return False
         return True
 
-    def validate_symbols(self, symbols_list: str) -> tuple:
+    def validate_symbols(self, symbols_list: list) -> tuple:
         """
 
         :param symbols_list:
@@ -169,7 +171,7 @@ class TicksGetter:
     def get_ticks(self, symbols: tuple | str):
         """
         Function to get ticks of symbols
-        :param symbols: Tuple of symbols from gui.symbols_to_get_tree
+        :param symbols: Tuple of symbols.
         """
         if not self.authorized:
             logger.error('Can\' get ticks - not logged in')
@@ -218,3 +220,4 @@ class TicksGetter:
 
     def get_ticks_partly(self, symbol: tuple | str):
         ...
+
