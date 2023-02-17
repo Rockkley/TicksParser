@@ -7,7 +7,7 @@ Supported formats for saving ticks: pkl, csv, json, html, xml, xlsx
 
 ***work in progress***
 
-## Known issues:
+## Known issues & TODOs:
 - [ ] Parsing all symbol's ticks for the whole period at once, what leads to fail on parsing big amount of ticks (unknown amount).
 - [ ] Blocks main thread during parsing ticks
 - [ ] Fails to create treeview of symbols found on server with multiple sub-dirs.
@@ -19,6 +19,7 @@ parsed before just to save it in a different format.
 - [ ] Only pandas.to_ formats are available
 - [ ] GUI code is not properly structured 
 - [ ] Minimalistic GUI
+- [ ] Missing archiving options
 - [ ] Missing option to add accounts via GUI
 - [ ] Missing option to set hours and minutes in dates 
 - [ ] Missing compressing options for saving ticks
