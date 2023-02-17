@@ -3,7 +3,7 @@ import calendar
 from tkinter import ttk, messagebox
 from datetime import datetime
 from accounts import Accounts
-from main import logger, Formats, TicksGetter
+from ticksgetter import logger, Formats, TicksGetter
 
 
 class GUI:
@@ -299,10 +299,3 @@ class GUI:
         #     self.day_to_spinbox.config(to=days_in_month[month])
 
 
-if __name__ == '__main__':
-    logger.info("Launching program...")
-    gui = GUI()
-    gui.root.mainloop()
-
-    # ticks_getter.login(Accounts.fbs)
-    # ticks_getter.get_ticks(('XAUUSD',))
