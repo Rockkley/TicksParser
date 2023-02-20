@@ -28,6 +28,8 @@ class GUI(tk.Tk):
         self.btn_get_ticks = self.create_get_ticks_button()
         self.server_symbols_tree = self.create_server_symbols_tree()
         self.connection_indicator = self.create_connection_indicator()
+        self.symbols_to_get_tree = self.create_symbols_to_get_tree()
+
         # Main title
         self.main_title = tk.Label(self, text='Settings', font='0 12 italic', pady=15, padx=10)
         self.main_title.grid(row=0, column=0, sticky='nw')
@@ -123,23 +125,9 @@ class GUI(tk.Tk):
         )
         self.year_to_spinbox.grid(column=1, row=1)
         # Scrollbar layouts
-        self.scrollbar_to_get_layout = tk.Canvas(self.settings_frame)
-        # Symbols To Parse
-        self.symbols_to_get_tree = ttk.Treeview(self.scrollbar_to_get_layout)
-        self.symbols_to_get_tree.heading('#0', text='To get', anchor=tk.W)
-        self.symbols_to_get_tree.grid(row=2, column=2, sticky="W")
-        # To get scrollbar
-        self.to_get_scrollbar = tk.Scrollbar(
-            self.settings_frame,
-            orient='vertical',
-            command=self.symbols_to_get_tree.yview)
-        self.symbols_to_get_tree.configure(yscrollcommand=self.to_get_scrollbar.set)
-        self.to_get_scrollbar.grid(row=2, column=3, columnspan=3, sticky="ns")
 
-        self.scrollbar_to_get_layout.grid(column=2, row=2)
-        self.symbols_to_get_tree.bind(
-            '<Double-1>', lambda _: self.move_symbols(source='on_parselist')
-        )
+        # Symbols To Parse
+
         self.btn_info = tk.Button(self, text="?", borderwidth=1, command=self.show_info)
         self.btn_info.grid(row=0, column=1, sticky="SE", pady=15, padx=15)
 
@@ -278,15 +266,16 @@ class GUI(tk.Tk):
             values=values,
             state='readonly', width=15)
         login_combobox.grid(row=0, column=1, sticky="W", pady=10)
-        login_combobox.current(0)
+        login_combobox.set('Select account...')
+        # login_combobox.current(0)
         return login_combobox
 
     def create_format_combobox(self) -> ttk.Combobox:
         """Creates combobox of saving formats"""
         format_combobox = ttk.Combobox(self.settings_frame, values=[i.value for i in Formats],
-                                       width=7, state='readonly')
+                                       width=13, state='readonly')
         format_combobox.grid(row=3, column=1, sticky="W", pady=10, padx=10)
-        format_combobox.current(0)
+        format_combobox.set('Select format...')
         return format_combobox
 
     def create_login_button(self) -> ttk.Button:
@@ -330,3 +319,29 @@ class GUI(tk.Tk):
         connection_indicator = tk.Label(self.settings_frame, text='\u2B24', fg='red')
         connection_indicator.grid(column=1, columnspan=4, row=0, sticky='e')
         return connection_indicator
+
+    def create_symbols_to_get_tree(self) -> ttk.Treeview:
+        """Creates treeview of chosen symbols"""
+        scrollbar_to_get_layout = tk.Canvas(self.settings_frame)
+        scrollbar_to_get_layout.grid(column=2, row=2)
+        symbols_to_get_tree = ttk.Treeview(scrollbar_to_get_layout)
+        symbols_to_get_tree.heading('#0', text='To get', anchor=tk.W)
+        symbols_to_get_tree.grid(row=2, column=2, sticky="W")
+        # To get scrollbar
+        to_get_scrollbar = tk.Scrollbar(
+            self.settings_frame,
+            orient='vertical',
+            command=symbols_to_get_tree.yview)
+        symbols_to_get_tree.configure(yscrollcommand=to_get_scrollbar.set)
+        to_get_scrollbar.grid(row=2, column=3, columnspan=3, sticky="ns")
+        symbols_to_get_tree.bind(
+            '<Double-1>', lambda _: self.move_symbols(source='on_parselist')
+        )
+        return symbols_to_get_tree
+
+
+def run():
+    """Runs tkinter GUI"""
+    gui = GUI()
+    gui.mainloop()
+

@@ -2,7 +2,7 @@
 Ticks and Formats data structures
 """
 from datetime import datetime
-from typing import NamedTuple, Callable, Optional
+from typing import NamedTuple, Callable
 from enum import Enum
 import pandas as pd
 

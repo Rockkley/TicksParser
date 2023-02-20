@@ -14,6 +14,5 @@ logging.basicConfig(datefmt="%d-%m-%y %H:%M:%S", level=logging.INFO)
 
 if __name__ == "__main__":
     logger.info("Launching program...")
-    gui = gui.GUI()
-    gui.mainloop()
+    gui.run()
 

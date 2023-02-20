@@ -32,7 +32,8 @@ class TicksGetter:
 
     def get_account_from_string(self, account_name: str) -> LoginInfo | bool:
         """
-        Gets LoginInfo corresponding to name from account_name argument
+        Gets LoginInfo corresponding to name from account_name argument.
+
         :param account_name: name of saved account.
         :return: LoginInfo file that contains data for authorisation.
         """
@@ -79,8 +80,9 @@ class TicksGetter:
 
     def set_account_info(self) -> bool:
         """
+        Gets information of account and sets it to classes attributes.
 
-        :return: True if account info set successfully, else False
+        :return: True if account info set successfully, else False.
         """
         self.company_name = mt5.account_info().company
         self.symbols_from_server = {symbol.path for symbol in mt5.symbols_get()}
@@ -92,9 +94,10 @@ class TicksGetter:
 
     def save_to_file(self, format_: Formats) -> bool:
         """
+        Saves ticks to a file in one of the format from Formats class.
 
-        :param format_:
-        :return: True if file saved successfully, else False.
+        :param format_: format to save to
+        :return: False if saved file not found in the directory of corresponding format.
         """
         format_name = format_.value
         for ticks_file in self.collected_tickets:
@@ -128,7 +131,7 @@ class TicksGetter:
 
     def close_connection(self):
         """
-        Close the connection to MT account, shutdowns terminal
+        Closes the connection to MT account, shutdowns terminal.
         """
         if self.authorized:
             self.symbols_from_server.clear()
@@ -142,8 +145,9 @@ class TicksGetter:
 
     def get_ticks(self, symbols: tuple | str) -> bool:
         """
-        Function to get ticks of symbols
-        :param symbols: Tuple of symbols.
+        Function to get ticks of symbols.
+
+        :param symbols: Tuple of symbols
         """
         if not self.authorized:
             logger.error('Can\' get ticks - not logged in')
