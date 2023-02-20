@@ -10,17 +10,18 @@ import pandas as pd
 class Ticks(NamedTuple):
     """
     A NamedTuple representing the data of parsed ticks.
-     Attributes:
-         TITLE (str):
-            Title of the symbol.
-         DATAFRAME (pd.DataFrame):
-            Dataframe containing ticks.
-         DATE_FROM (datetime):
-            Starting date of ticks.
-         DATE_TO (datetime):
-            Ending date of ticks.
-         BROKER (str):
-            Name of broker from which the ticks parsed.
+    Attributes:
+
+    TITLE (str):
+        Title of the symbol.
+    DATAFRAME (pd.DataFrame):
+        Dataframe containing ticks.
+    DATE_FROM (datetime):
+        Starting date of ticks.
+    DATE_TO (datetime):
+        Ending date of ticks.
+    BROKER (str):
+        Name of broker from which the ticks parsed.
     """
     TITLE: str
     DATAFRAME: pd.DataFrame
@@ -32,13 +33,20 @@ class Ticks(NamedTuple):
 class Formats(Enum):
     """
     Enumeration of possible file formats.
-        Attributes:
-        PKL (str): The pickle format.
-        CSV (str): The CSV format.
-        HTML (str): The HTML format.
-        JSON (str): The JSON format.
-        XML (str): The XML format.
-        XLSX (str): The XLSX format.
+    Attributes:
+
+    PKL (str):
+        Pickle format.
+    CSV (str):
+        CSV format.
+    HTML (str):
+        HTML format.
+    JSON (str):
+        JSON format.
+    XML (str):
+        XML format.
+    XLSX (str):
+        XLSX format.
     """
     PKL = 'pkl'
     CSV = 'csv'

@@ -171,7 +171,7 @@ class GUI(tk.Tk):
         2023
         ''')
 
-    def get_all_tree_items(self) -> list:
+    def get_all_chosen_symbols(self) -> list:
         """Returns a list of symbols names from a list of chosen symbols."""
         return [self.symbols_to_get_tree.item(symbol)['text']
                 for symbol in self.symbols_to_get_tree.get_children()]
@@ -186,7 +186,7 @@ class GUI(tk.Tk):
             is_parent = self.server_symbols_tree.get_children(tree_selection)
             if not is_parent:
                 symbol_only = tree_selection.split('/')[-1]
-                if symbol_only not in self.get_all_tree_items():
+                if symbol_only not in self.get_all_chosen_symbols():
                     self.symbols_to_get_tree.insert("", tk.END, text=symbol_only)
         to_get_list = self.symbols_to_get_tree.get_children()
         self.btn_get_ticks['state'] = 'normal' if to_get_list else 'disabled'
@@ -221,11 +221,16 @@ class GUI(tk.Tk):
 
     def get_ticks_from_btn(self):
         """Calls 'get_ticks' function from button"""
-        chosen_symbols = tuple(self.get_all_tree_items())
+        chosen_symbols = tuple(self.get_all_chosen_symbols())
+        format_ = ''
         if not chosen_symbols:
             logger.warning('No selected symbols')
             return
-        format_ = Formats[self.format_combobox.get().upper()]
+        try:
+            format_ = Formats[self.format_combobox.get().upper()]
+        except KeyError:
+            logger.warning('Select saving format')
+            return
         if self.set_dates_from_spinboxes():
             self.ticks_getter.get_ticks(chosen_symbols)
             self.ticks_getter.save_to_file(format_=format_)
