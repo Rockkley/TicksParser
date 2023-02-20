@@ -13,7 +13,7 @@ Supported formats for saving ticks: pkl, csv, json, html, xml, xlsx
 - [ ] Fails to create treeview of symbols found on server with multiple sub-dirs.
 - [ ] Logger window is not used.
 - [ ] The parsed ticks aren't cached, what may lead to re-parsing ticks that have been already 
-parsed before just to save it in a different format.
+parsed before, just to save it in a different format.
 - [ ] Login information hardcoded
 - [x] It's possible to set date_to < date from
 - [ ] Only pandas.to_ formats are available
