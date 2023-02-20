@@ -19,7 +19,7 @@ parsed before, just to save it in a different format.
 - [ ] Only pandas.to_ formats are available
 - [ ] GUI code is not properly structured 
 - [ ] Minimalistic GUI
-- [ ] Missing archiving options
+- [ ] Missing archiving options for saved files
 - [ ] Missing option to add accounts via GUI
 - [ ] Missing option to set hours and minutes in dates 
 - [ ] Missing compressing options for saving ticks
