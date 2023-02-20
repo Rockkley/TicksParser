@@ -8,6 +8,7 @@ Supported formats for saving ticks: pkl, csv, json, html, xml, xlsx
 ***work in progress***
 
 ## :bookmark_tabs:Known issues & TODOs:
+- [ ] Not MVC
 - [ ] Parsing all symbol's ticks for the whole period at once, what leads to fail on parsing big amount of ticks (unknown amount).
 - [ ] Blocks main thread during parsing ticks
 - [ ] Fails to create treeview of symbols found on server with multiple sub-dirs.
