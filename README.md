@@ -12,7 +12,7 @@ Supported formats for saving ticks: pkl, csv, json, html, xml, xlsx
 - [ ] Blocks main thread during parsing ticks
 - [ ] Fails to create treeview of symbols found on server with multiple sub-dirs.
 - [ ] Logger window is not used.
-- [ ] The parsed ticks aren't stored temporary anywhere, what may lead to re-parsing ticks that have been already 
+- [ ] The parsed ticks aren't cached, what may lead to re-parsing ticks that have been already 
 parsed before just to save it in a different format.
 - [ ] Login information hardcoded
 - [x] It's possible to set date_to < date from
