@@ -262,15 +262,13 @@ class GUI(tk.Tk):
         return True
 
     def get_ticks_from_btn(self):
-        chosen_symbols = self.get_all_tree_items()
+        chosen_symbols = tuple(self.get_all_tree_items())
         if not chosen_symbols:
             logger.warning('No selected symbols')
             return
         format_ = Formats[self.format_combobox.get().upper()]
         if self.set_dates_from_spinboxes():
-            valid_symbols = self.ticks_getter.validate_symbols(chosen_symbols)
-            self.ticks_getter.get_ticks(valid_symbols)
-
+            self.ticks_getter.get_ticks(chosen_symbols)
             self.ticks_getter.save_to_file(format_=format_)
 
     def update_date_in_spinbox(self, source: str, month: int, year: int):

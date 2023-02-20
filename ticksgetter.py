@@ -19,17 +19,20 @@ class TicksGetter:
 
         """
         self.company_name = None
+        self.authorized = False
         self.timezone = pytz.timezone("Etc/UTC")
         self.utc_from = datetime(year=2021, month=1, day=1, tzinfo=self.timezone)
         self.utc_to = datetime(year=2022, month=1, day=1, tzinfo=self.timezone)
         self.not_found_ticks: list[str] = []
-        self.authorized = False
         self.symbols_from_server = set()
         self.collected_tickets: list[Ticks] = []
+        self.template = Template(
+                'ticks_${format}/${filename}_${broker}_${date_from}_${date_to}.$format_extension'
+        )
 
     def get_account_from_string(self, account_name: str) -> LoginInfo | bool:
         """
-
+        Gets LoginInfo corresponding to name from account_name argument
         :param account_name: name of saved account.
         :return: LoginInfo file that contains data for authorisation.
         """
@@ -96,10 +99,8 @@ class TicksGetter:
         format_name = format_.value
         for ticks_file in self.collected_tickets:
             Path(f'ticks_{format_name}').mkdir(parents=True, exist_ok=True)
-            # example - ticks_xlsx/AUDCAD_FBS_20221202_19012023.xlsx
-            template = Template(
-                'ticks_${format}/${filename}_${broker}_${date_from}_${date_to}.$format_extension')
-            out_filename_template = template.substitute(
+
+            out_filename_template = self.template.substitute(
                 format=format_name,
                 filename=ticks_file.TITLE,
                 broker=ticks_file.BROKER,
@@ -112,22 +113,17 @@ class TicksGetter:
                 format_extension=format_name)
             path = Path(out_filename_template).resolve()
 
-            # Call a save function corresponding to the given format
+            # Call a saving function corresponding to the given format
             try:
                 logger.info('Saving %s to .%s...', ticks_file.TITLE, format_name)
                 Formats.save_match_format(ticks_file, format_)(path)
-
+                if Path.is_file(path):  # Checking file actually saved and presents in the folder
+                    logger.info('Successfully saved to %s\n', path.name)
             except Exception as excpt:
                 logger.error('ERROR while saving to .%s', format_name)
                 print(excpt)
                 return False
 
-            if Path.is_file(path):  # Checking file actually saved and presents in the folder
-                logger.info('Successfully saved to %s.%s\n', ticks_file.TITLE, format_name)
-            else:
-                print(ticks_file, format_, path, format_name)
-                logger.error('ERROR while saving to .%s', format_name)
-                return False
         self.collected_tickets.clear()
 
     def close_connection(self):
@@ -144,44 +140,20 @@ class TicksGetter:
         else:
             logger.warning('Connection was not established')
 
-    def is_valid_symbol(self, symbol: str) -> bool:
-        """
-
-        :param symbol:
-        :return: True if the symbol is valid, else False
-        """
-        if not self.symbols_from_server:
-            logger.error("Didn't received symbols from server")
-            return False
-        if {symbol} > self.symbols_from_server:
-            logger.warning('%s is not in the list of symbols from %s server',
-                           symbol, self.company_name)
-            return False
-        return True
-
-    def validate_symbols(self, symbols_list: list) -> tuple:
-        """
-
-        :param symbols_list:
-        :return:
-        """
-        valid_symbols = [symbol for symbol in symbols_list if self.is_valid_symbol(symbol)]
-        return tuple(valid_symbols)
-
-    def get_ticks(self, symbols: tuple | str):
+    def get_ticks(self, symbols: tuple | str) -> bool:
         """
         Function to get ticks of symbols
         :param symbols: Tuple of symbols.
         """
         if not self.authorized:
             logger.error('Can\' get ticks - not logged in')
-            return
+            return False
 
         if not symbols:  # Base case for recursion
             logger.info('Done parsing ticks')
             if self.not_found_ticks:
                 logger.info('Ticks not found for symbols: %s', self.not_found_ticks)
-            return
+            return True
 
         logger.info('Symbols in the queue - %s', symbols)
         current_symbol = symbols[0]
@@ -220,4 +192,3 @@ class TicksGetter:
 
     def get_ticks_partly(self, symbol: tuple | str):
         ...
-
