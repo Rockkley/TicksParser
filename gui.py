@@ -13,10 +13,16 @@ WIDGET_BACKGROUND_COLOR = 'white smoke'
 
 
 class ExportFrame(tk.Frame):
+    """Frame containing export combobox and label"""
+
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.config(bg=parent['bg'])
-        self.format_label = ttk.Label(self, text="Export format", font=LABELS_FONT, background=self['bg'])
+        self.format_label = ttk.Label(
+            self,
+            text="Export format",
+            font=LABELS_FONT,
+            background=self['bg'])
         self.format_combobox = self.create_format_combobox()
         self.format_label.grid(row=3, column=0, **WIDGET_ARGS)
         self.format_combobox.grid(row=3, column=1, **WIDGET_ARGS)
@@ -31,8 +37,17 @@ class ExportFrame(tk.Frame):
         format_combobox.set('Select format...')
         return format_combobox
 
+    def get_chosen_format(self) -> Formats:
+        try:
+            selection = self.format_combobox.get()
+            return Formats[selection.upper()]
+        except KeyError:
+            logger.warning('Select saving format')
+
 
 class LoginFrame(tk.Frame):
+    """Frame containing login form (spinbox, label and connection indicator)"""
+
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.config(bg=parent['bg'])
@@ -80,7 +95,9 @@ class LoginFrame(tk.Frame):
         self.parent.ticks_getter.login(self.login_combobox.get())
         self.parent.symbols_treeviews.clear_trees()
 
-    def trace_login_combobox(self, var, index, mode):
+    def trace_login_combobox(self, var=None, index=None, mode=None):
+        """Function to enable/disable login button
+        if login combobox changed."""
         values = self.login_combobox['values']
         if self.login_combobox.get() in values:
             self.btn_login.config(state=tk.NORMAL)
@@ -88,7 +105,9 @@ class LoginFrame(tk.Frame):
             self.btn_login.config(state=tk.DISABLED)
 
     def trace_connection(self, var, index, mode):
-        self.connection_indicator.config(fg='green' if self.parent.ticks_getter.authorized else 'red')
+        """Function to colorize connection indicator"""
+        self.connection_indicator.config(
+            fg='green' if self.parent.ticks_getter.authorized else 'red')
 
 
 class DatesFrame(tk.LabelFrame):
@@ -220,6 +239,10 @@ class DatesFrame(tk.LabelFrame):
         # elif source == 'to':
         #     self.day_to_spinbox.config(to=days_in_month[month])
 
+    def set_dates_to_tickparser(self, dates: dict[str, datetime]):
+
+        self.parent.ticks_getter.utc_from = dates['from_date']
+        self.parent.ticks_getter.utc_to = dates['to_date']
 
 class SymbolsTreeviewsFrame(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -270,7 +293,7 @@ class SymbolsTreeviewsFrame(tk.Frame):
         )
         return chosen_symbols_tree
 
-    def move_symbols(self, source: str, event=0):
+    def move_symbols(self, source: str, event=None):
         """Moves a symbol between server symbols treeview and a list of chosen symbols."""
         if source == 'on_parselist':
             parselist_selection = self.chosen_symbols_tree.focus()
@@ -304,10 +327,16 @@ class SymbolsTreeviewsFrame(tk.Frame):
                 self.server_symbols_tree.insert(parent_node, 'end', path_list[i], text=item_list[i])
                 parent_node = path_list[i]
 
-    def get_all_chosen_symbols(self) -> list:
+    def get_all_chosen_symbols(self) -> tuple:
         """Returns a list of symbols names from a list of chosen symbols."""
-        return [self.chosen_symbols_tree.item(symbol)['text']
-                for symbol in self.chosen_symbols_tree.get_children()]
+        if symbols_in_tree := tuple(
+            self.chosen_symbols_tree.item(symbol)['text']
+            for symbol in self.chosen_symbols_tree.get_children()
+        ):
+            return symbols_in_tree
+        logger.warning('No selected symbols')
+        return tuple()
+
 
     def clear_trees(self):
         print(self.parent)
@@ -337,19 +366,11 @@ class SettingsFrame(tk.LabelFrame):
 
     def get_ticks_from_btn(self):
         """Calls 'get_ticks' function from button"""
-        chosen_symbols = tuple(self.symbols_treeviews.get_all_chosen_symbols())
-        format_ = ''
-        if not chosen_symbols:
-            logger.warning('No selected symbols')
-            return
-        try:
-            format_ = Formats[self.export_frame.format_combobox.get().upper()]
-        except KeyError:
-            logger.warning('Select saving format')
-            return
+        chosen_symbols = self.symbols_treeviews.get_all_chosen_symbols()
+        format_ = self.export_frame.get_chosen_format()
+
         if dates := self.dates_frame.get_dates_from_spinboxes():
-            self.ticks_getter.utc_from = dates['from_date']
-            self.ticks_getter.utc_to = dates['to_date']
+            self.dates_frame.set_dates_to_tickparser(dates)
             self.ticks_getter.get_ticks(chosen_symbols)
             self.ticks_getter.save_to_file(format_=format_)
 
@@ -389,7 +410,7 @@ class MainApplication(tk.Tk):
         self.logger_frame.grid(row=0, column=1, padx=10, pady=10)
         self.btn_info.grid(row=3, column=1, pady=10, padx=10, sticky='e')
 
-    def trace_get_ticks_btn(self, var, index, mode):
+    def trace_get_ticks_btn(self, var=None, index=None, mode=None):
         to_get_list = self.settings_frame.symbols_treeviews.chosen_symbols_tree.get_children()
         print(to_get_list)
         self.btn_get_ticks['state'] = 'normal' if to_get_list else 'disabled'
@@ -400,7 +421,8 @@ class MainApplication(tk.Tk):
             self,
             text="Get Ticks",
             command=self.settings_frame.get_ticks_from_btn,
-            )
+            state='disabled',
+        )
         btn_get_ticks.grid(row=3, column=0, padx=10, pady=10)
         return btn_get_ticks
 

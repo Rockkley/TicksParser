@@ -32,21 +32,7 @@ class Ticks(NamedTuple):
 
 class Formats(Enum):
     """
-    Enumeration of possible file formats.
-    Attributes:
-
-    PKL (str):
-        Pickle format.
-    CSV (str):
-        CSV format.
-    HTML (str):
-        HTML format.
-    JSON (str):
-        JSON format.
-    XML (str):
-        XML format.
-    XLSX (str):
-        XLSX format.
+    Enumeration of possible exporting formats.
     """
     PKL = 'pkl'
     CSV = 'csv'
