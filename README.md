@@ -23,4 +23,3 @@ parsed before, just to save it in a different format.
 - [ ] Missing option to set hours and minutes in dates 
 - [ ] Missing compressing options for saving ticks
 - [ ] Missing documentation for some classes and functions.
-- [ ] Assorti of code smells
