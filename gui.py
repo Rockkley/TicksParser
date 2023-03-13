@@ -244,6 +244,7 @@ class DatesFrame(tk.LabelFrame):
         self.parent.ticks_getter.utc_from = dates['from_date']
         self.parent.ticks_getter.utc_to = dates['to_date']
 
+
 class SymbolsTreeviewsFrame(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
@@ -330,13 +331,12 @@ class SymbolsTreeviewsFrame(tk.Frame):
     def get_all_chosen_symbols(self) -> tuple:
         """Returns a list of symbols names from a list of chosen symbols."""
         if symbols_in_tree := tuple(
-            self.chosen_symbols_tree.item(symbol)['text']
-            for symbol in self.chosen_symbols_tree.get_children()
+                self.chosen_symbols_tree.item(symbol)['text']
+                for symbol in self.chosen_symbols_tree.get_children()
         ):
             return symbols_in_tree
         logger.warning('No selected symbols')
         return tuple()
-
 
     def clear_trees(self):
         print(self.parent)
@@ -368,11 +368,11 @@ class SettingsFrame(tk.LabelFrame):
         """Calls 'get_ticks' function from button"""
         chosen_symbols = self.symbols_treeviews.get_all_chosen_symbols()
         format_ = self.export_frame.get_chosen_format()
-
-        if dates := self.dates_frame.get_dates_from_spinboxes():
-            self.dates_frame.set_dates_to_tickparser(dates)
-            self.ticks_getter.get_ticks(chosen_symbols)
-            self.ticks_getter.save_to_file(format_=format_)
+        if chosen_symbols and format_:
+            if dates := self.dates_frame.get_dates_from_spinboxes():
+                self.dates_frame.set_dates_to_tickparser(dates)
+                self.ticks_getter.get_ticks(chosen_symbols)
+                self.ticks_getter.save_ticks_to_file(format_=format_)
 
 
 class LoggerFrame(tk.Frame):

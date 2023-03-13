@@ -87,12 +87,12 @@ class TicksGetter:
         self.company_name = mt5.account_info().company
         self.symbols_from_server = {symbol.path for symbol in mt5.symbols_get()}
         if not self.symbols_from_server:
-            logger.error('Did not received symbols list from the server')
+            logger.error('Did not receive symbols list from the server')
             return False
         logger.info('Got account information the server')
         return True
 
-    def save_to_file(self, format_: Formats) -> bool:
+    def save_ticks_to_file(self, format_: Formats) -> bool:
         """
         Saves ticks to a file in one of the format from Formats class.
 
@@ -100,9 +100,8 @@ class TicksGetter:
         :return: False if saved file not found in the directory of corresponding format.
         """
         format_name = format_.value
+        Path(f'ticks_{format_name}').mkdir(parents=True, exist_ok=True)
         for ticks_file in self.collected_tickets:
-            Path(f'ticks_{format_name}').mkdir(parents=True, exist_ok=True)
-
             out_filename_template = self.template.substitute(
                 format=format_name,
                 filename=ticks_file.TITLE,
@@ -117,17 +116,16 @@ class TicksGetter:
             path = Path(out_filename_template).resolve()
 
             # Call a saving function corresponding to the given format
+            logger.info('Saving %s to .%s...', ticks_file.TITLE, format_name)
+            Formats.save_match_format(ticks_file, format_)(path)
             try:
-                logger.info('Saving %s to .%s...', ticks_file.TITLE, format_name)
-                Formats.save_match_format(ticks_file, format_)(path)
                 if Path.is_file(path):  # Checking file actually saved and presents in the folder
                     logger.info('Successfully saved to %s\n', path.name)
-            except Exception as excpt:
+            except FileNotFoundError:
                 logger.error('ERROR while saving to .%s', format_name)
-                print(excpt)
                 return False
-
         self.collected_tickets.clear()
+        return True
 
     def close_connection(self):
         """
@@ -165,34 +163,45 @@ class TicksGetter:
         logger.info('Parsing ticks of %s from date %s to %s',
                     current_symbol, self.utc_from, self.utc_to)
         ticks = mt5.copy_ticks_range(current_symbol, self.utc_from, self.utc_to, mt5.COPY_TICKS_ALL)
-        status_code = mt5.last_error()
-
-        match status_code[0]:
-            case 1:
-                if len(ticks):
-                    logger.info('Ticks received: %i\n', len(ticks))
-                    ticks_frame = pd.DataFrame(ticks)
-                    ticks = Ticks(
-                        TITLE=current_symbol,
-                        DATAFRAME=ticks_frame,
-                        DATE_FROM=self.utc_from,
-                        DATE_TO=self.utc_to,
-                        BROKER=''.join(self.company_name.split())
-                      )
-                    self.collected_tickets.append(ticks)
-                else:
-                    logger.warning('Symbol found but no ticks received')
-                self.get_ticks(symbols=symbols[1::])
-            case -3:
-                logger.warning('Ticks dataframe is too large, will divide periods and glue')
-                # self.get_ticks_partly(symbol=current_symbol)
-            case -10001:
-                logger.warning('Terminal is not launched.')
-            case _:
-                logger.error('Can\'t get ticks from %s; MT Last error - %s\n',
-                             current_symbol, status_code)
+        if self.match_status_code() == 1:
+            if len(ticks):
+                logger.info('Ticks received: %i\n', len(ticks))
+                ticks_frame = pd.DataFrame(ticks)
+                ticks = Ticks(
+                    TITLE=current_symbol,
+                    DATAFRAME=ticks_frame,
+                    DATE_FROM=self.utc_from,
+                    DATE_TO=self.utc_to,
+                    BROKER=''.join(self.company_name.split())
+                  )
+                self.collected_tickets.append(ticks)
+            else:
+                logger.warning('Symbol found but no ticks received')
                 self.not_found_ticks.append(current_symbol)
-                self.get_ticks(symbols=symbols[1::])
+        else:
+            logger.error('Can\'t get ticks from %s;\n', current_symbol)
+
+        self.get_ticks(symbols=symbols[1::])
 
     def get_ticks_partly(self, symbol: tuple | str):
         ...
+
+    def match_status_code(self) -> int:
+        status_code = mt5.last_error()[0]
+        match status_code:
+            case -3:
+                logger.warning('Out of memory')
+            # self.get_ticks_partly(symbol=current_symbol)
+
+            case -10001:
+                logger.warning('Terminal is not launched.')
+
+            case 1:
+                logger.info('Status code OK')
+
+            case _:
+                logger.error('MT Last error - %s\n', status_code)
+        return status_code
+
+
+
