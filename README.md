@@ -1,4 +1,4 @@
-# TicksParser BETA v 0.5
+# TicksGetter BETA v 0.5
 ![preview](https://github.com/Rockkley/TicksParser/blob/master/atpgp.png)
 
 Software to parse and save stock ticks using official [Metatrader 5 API](https://pypi.org/project/MetaTrader5/)
